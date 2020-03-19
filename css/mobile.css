@@ -1,0 +1,12 @@
+@media screen and (max-width: 500px) {
+    .top-header .left {
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+    }
+
+    .top-header .right {
+        display: none;
+    }
+
+}

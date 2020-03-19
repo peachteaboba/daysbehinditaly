@@ -1,0 +1,120 @@
+.header {
+    background: linear-gradient(160deg, rgba(1, 2, 15, 1) 0%, rgba(8, 25, 76, 1) 100%);
+    height: 50px;
+    width: 100%;
+}
+
+.body-wrapper {
+    /* outline: 1px dotted red; */
+    width: 100%;
+    min-height: 200px;
+    font-family: 'Lato';
+}
+
+#day-wrapper {
+    display: inline-block;
+    vertical-align: top;
+    width: 40px;
+    /* outline: 1px dotted blue; */
+    padding-top: 50px;
+}
+
+#day-wrapper .day-title {
+    font-weight: 900;
+    font-size: 11px;
+    outline: 1px dotted blue;
+    height: 22px;
+}
+
+#day-wrapper div {
+    width: 100%;
+    text-align: center;
+    font-size: 0.75em;
+    height: 22px;
+    line-height: 22px;
+}
+
+#italy-wrapper {
+    display: inline-block;
+    vertical-align: top;
+    /* width: 160px; */
+    /* outline: 1px dotted blue; */
+    padding-top: 10px;
+}
+
+.even {
+    background: rgba(0,0,0,0.08);
+}
+
+.country-title {
+
+    height: 40px;
+    /* outline: 1px dotted blue; */
+    background: rgba(234,76,60,0.15);
+}
+
+.country-title h1 {
+    /* margin-top: 10px; */
+    font-weight: 900;
+    text-align: center;
+    font-size: 12px;
+    /* background: red; */
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 7px;
+    width: 100%;
+}
+
+.country-title p {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+    font-size: 9px;
+    text-align: center;
+}
+
+.country-body {
+    /* outline: 1px dotted green; */
+    min-height: 60px;
+    position: relative;
+
+}
+
+.country-date {
+    display: inline-block;
+    vertical-align: top;
+    /* padding: 0 10px; */
+
+
+}
+
+.country-date-title {
+    outline: 1px dotted blue;
+    font-size: 0.8em;
+    height: 22px;
+    line-height: 22px;
+    /* margin-top: 5px; */
+    text-align: center;
+    font-weight: 900;
+    font-size: 11px;
+}
+
+.country-date .date {
+    font-size: 0.75em;
+    height: 22px;
+    line-height: 22px;
+    padding: 0 10px;
+    text-align: right;
+
+}
+
+.country-date .cases {
+    font-size: 0.75em;
+    height: 22px;
+    line-height: 22px;
+    padding: 0 10px;
+    text-align: center;
+
+
+
+}
