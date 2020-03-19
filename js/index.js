@@ -33,16 +33,14 @@ function initControls() {
     }).on('change', function () {
         setTimeout(function () {
             urlGenerator('starting', startingCount);
-            dataset = processData();
-            renderList();
+            processData();
         }, 500);
     }).val(startingCount);
 
     $('#expand').on('change', function () {
         expand = $(this).is(":checked");
         urlGenerator('expand', expand ? '1' : '0');
-        dataset = processData();
-        renderList();
+        processData();
     });
 
     // Set initial values
@@ -66,11 +64,11 @@ function urlGenerator(field, value) {
 
 function getData() {
     $.get("https://pomber.github.io/covid19/timeseries.json", function (data) {
-        console.log(data);
+        // console.log(data);
         dataRaw = data;
-        dataset = processData();
+        processData();
     }).then(function () {
-        renderList();
+        // Done
     });
 }
 
@@ -107,7 +105,6 @@ function processData() {
                     };
                     dataCount.push({
                         id: id,
-                        count: arr.length,
                         latest: latest
                     });
                 }
@@ -115,61 +112,106 @@ function processData() {
         }
     }
     dataCount.sort((a, b) => (a.latest < b.latest) ? 1 : -1);
-    return processed;
+
+    // -------------------------------------------------
+    // ------------ Shift To Match Italy ---------------
+    // -------------------------------------------------
+    let delta = {};
+    const italyData = processed['italy']['data'];
+    for (let prop in processed) {
+        if (Object.prototype.hasOwnProperty.call(processed, prop)) {
+            let country = processed[prop];
+            if (country['name'] !== 'Italy') {
+                let countryData = country['data'];
+                // Get max for country
+                const countryMax = country['latest'];
+                // Find index of lowest delta
+                delta = {};
+                let value;
+                for (let i = 0; i < italyData.length; i++) {
+                    // Record lowest delta
+                    value = Math.abs(italyData[i]['confirmed'] - countryMax);
+                    if (typeof delta.value === "undefined" || delta.value > value) {
+                        delta.value = value;
+                        delta.idx = i;
+                    }
+                }
+                country['idx'] = delta.idx;
+                // Make sure idx in delta obj matches with length of countryData
+                if (countryData.length > delta.idx) {
+                    // Need to Trim
+                    country['data'] = countryData.slice(-1 * (delta.idx + 1));
+                } else {
+                    // Need to Add
+                    let daysBehind = 0;
+                    const earliestDate = countryData[0]['date'];
+                    while (countryData.length !== (delta.idx + 1)) {
+                        daysBehind++;
+                        let d = new Date(earliestDate);
+                        d.setDate(d.getDate() - daysBehind);
+                        countryData.unshift({
+                            date: d,
+                            confirmed: '-',
+                            deaths: '-',
+                            recovered: '-'
+                        });
+                    }
+                    country['data'] = countryData;
+                }
+                // ----------------------------------------------------
+                // ------------ Populate Remaining Days ---------------
+                // ----------------------------------------------------
+                countryData = country['data'];
+                let daysForward = 0;
+                const latestDate = countryData[countryData.length - 1]['date'];
+                while (countryData.length !== italyData.length) {
+                    daysForward++;
+                    let d = new Date(latestDate);
+                    d.setDate(d.getDate() + daysForward);
+                    countryData.push({
+                        date: d,
+                        confirmed: '-',
+                        deaths: '-',
+                        recovered: '-',
+                        days: daysForward
+                    });
+                }
+            }
+        }
+    }
+
+    // Proceed to render
+    dataset = processed;
+    renderList();
 }
 
 function renderList() {
-    console.log(dataset);
-    console.log(dataCount);
-
     const bodyEl = $('#body');
     bodyEl.html('');
 
     let html_arr = [];
     dataCount.forEach(function (el) {
         if (el.id !== 'italy' && dataset[el.id] && dataset[el.id].data) {
-            //const country = dataset[id];
-
-
             // Create body wrapper div
             html_arr.push([
                 '<div class="body-wrapper">',
-
                 // Render day element
                 '<div class="day-wrapper">',
                 render.dayColumn(dataset['italy'].count),
                 '</div>',
                 // Render italy element
                 '<div class="italy-wrapper">',
-                render.countryColumn(dataset['italy']),
+                render.countryColumn(dataset['italy'], dataset[el.id]['idx']),
                 '</div>',
                 // Render country element
                 '<div class="country-wrapper">',
-                render.countryColumn(dataset[el.id]),
+                render.countryColumn(dataset[el.id], dataset[el.id]['idx']),
                 '</div>',
-
-
                 '</div>'
             ].join(''));
-
-
         }
     });
-
     bodyEl.html(html_arr.join(''));
-
-
-    // // Render day column
-    // const dayWrapper = $('#day-wrapper');
-    // dayWrapper.html();
-    //
-    // // Render italy
-    // const italyWrapper = $('#italy-wrapper');
-    // italyWrapper.html(render.countryColumn(dataset['italy']));
-    //
-    //
-
-
 }
 
 

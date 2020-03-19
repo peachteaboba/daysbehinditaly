@@ -12,7 +12,7 @@ render.dayColumn = function (count) {
     return html.join('');
 };
 
-render.countryColumn = function (data) {
+render.countryColumn = function (data, idx) {
     let body = ['<div class="country-body">'];
 
     // Build Date HTML :::::::::::::::::::::::
@@ -21,11 +21,20 @@ render.countryColumn = function (data) {
     date_html.push('<div class="country-date">');
     date_html.push('<div class="country-date-title date">Date</div>');
     for (let i = 0; i <= data.data.length - 1; i++) {
-        //console.log(data.data[i]);
         let date = new Date(data.data[i]['date']);
         date = moment(date).format('ddd, MMM DD');
-        const dynamicClass = i % 2 === 0 ? 'date even' : 'date';
-        date_html.push('<div class="' + dynamicClass + '"> ' + date + ' </div>');
+        let isSameDayClass = '';
+        if (moment(data.data[i]['date']).isSame(moment(), 'day')) {
+            isSameDayClass = ' today';
+        }
+        const dynamicClass = i % 2 === 0 ? 'date even' + isSameDayClass : 'date' + isSameDayClass;
+        date_html.push('<div class="' + dynamicClass + '"> ' + date);
+        // Add days forward if needed
+        const days = data.data[i]['days'];
+        if (data['name'] !== 'Italy' && typeof days !== "undefined") {
+            date_html.push('<div class="days-forward">+ ' + days + ' days</div>');
+        }
+        date_html.push('</div>');
     }
     date_html.push('</div>');
 
@@ -35,7 +44,11 @@ render.countryColumn = function (data) {
     cases_html.push('<div class="country-date">');
     cases_html.push('<div class="country-date-title">Cases</div>');
     for (let i = 0; i <= data['data'].length - 1; i++) {
-        const dynamicClass = i % 2 === 0 ? 'cases total even' : 'cases total';
+        let matchClass = '';
+        if (idx && i === idx) {
+            matchClass = ' match';
+        }
+        const dynamicClass = i % 2 === 0 ? 'cases total even' + matchClass : 'cases total' + matchClass;
         cases_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['confirmed'] + ' </div>');
     }
     cases_html.push('</div>');

@@ -53,7 +53,7 @@ body {
     /*outline: 1px dotted blue;*/
     /*background: rgba(8, 25, 76, 0.05);*/
     text-align: center;
-    padding: 20px 30px 20px 20px;
+    padding: 20px 20px 20px 20px;
     max-width: 800px;
     border-left: 1px solid #20223C;
     border-right: 1px solid #20223C;
@@ -119,10 +119,19 @@ body {
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
     margin-left: 4px;
+    margin-right: 50px;
 }
 
 .even {
     background: rgba(8, 25, 76, 0.04);
+}
+.today {
+    background: rgba(255, 227, 0, 0.45);
+}
+
+.match {
+    /*outline: 2px solid rgba(29, 208, 98, 0.45);*/
+    background: rgba(23, 140, 247, 0.3);
 }
 
 /*.even-it {*/
@@ -199,6 +208,7 @@ body {
     padding: 0 8px 0 15px;
     text-align: right;
     color: rgba(8, 25, 76, 0.65);
+    position: relative;
 }
 
 .country-wrapper .country-date .date {
@@ -224,6 +234,18 @@ body {
 
 .country-date .cases.rec {
     color: #04A340 !important;
+}
+
+.days-forward {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 10px);
+    color: white;
+    /*outline: 1px dotted red;*/
+    font-size: 1em;
+    height: 24px;
+    line-height: 24px;
+    width: 50px;
 }
 
 
