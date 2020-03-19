@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="./css/mobile.css">
 
     <!-- JS -->
-    <script type="text/javascript" src="./js/jquery.min.js"></script>
-    <script type="text/javascript" src="./js/moment.min.js"></script>
+    <script type="text/javascript" src="js/packages/jquery.min.js"></script>
+    <script type="text/javascript" src="js/packages/moment.min.js"></script>
     <script type="text/javascript" src="./js/render.js"></script>
     <script type="text/javascript" src="./js/index.js"></script>
 
@@ -24,15 +24,47 @@
 
 </head>
 <body>
-<div class="header"></div>
 
-<div class="body-wrapper">
-    <div id="day-wrapper"></div>
-    <div id="italy-wrapper"></div>
+<div class="center-wrapper">
+    <!---------------->
+    <!-- LEFT PANEL -->
+    <!---------------->
+    <div class="controls-wrapper">
+        <div class="header">
+            <h1>#daysbehinditaly</h1>
+            <p>Number of days various countries are behind Italy in total COVID-19 cases assuming similar case growth rate</p>
+            <p>Based on data from <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6" target="_blank">2019 Novel Coronavirus COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE</a></p>
+        </div>
+        <div class="slide-container">
+            <label for="starting-range">Starting Case Number</label>
+            <div id="amount_slider"></div>
+            <input type="range" min="100" max="10000" value="500" class="slider" id="starting-range" name="starting">
+            <p id="starting-range-label">-</p>
+        </div>
+
+        <div class="toggle-wrapper">
+            <p>Display Deaths and Recoveries</p>
+            <label class="toggle">
+                <input type="checkbox" id="expand"/>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+
+
+
+    </div>
+    <div id="body"></div>
+    <div id="twitter-wrapper"></div>
 
 
 
 </div>
+<!--<div class="header"></div>-->
+
+
+
+
 
 
 
