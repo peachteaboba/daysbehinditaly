@@ -19,7 +19,7 @@ render.countryColumn = function (data) {
     // :::::::::::::::::::::::::::::::::::::::
     let date_html = [];
     date_html.push('<div class="country-date">');
-    date_html.push('<div class="country-date-title">Date</div>');
+    date_html.push('<div class="country-date-title date">Date</div>');
     for (let i = 0; i <= data.data.length - 1; i++) {
         //console.log(data.data[i]);
         let date = new Date(data.data[i]['date']);
@@ -81,7 +81,7 @@ render.countryColumn = function (data) {
     body.push('</div>');
 
     let html = [
-        '<div class="country-title"><h1>' + data.name + '</h1><p>P · 60M</p></div>',
+        '<div class="country-title"><h1>' + data.name + '</h1></div>',
         body.join('')
     ];
 

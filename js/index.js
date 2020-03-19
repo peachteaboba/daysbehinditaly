@@ -61,12 +61,12 @@ function urlGenerator(field, value) {
     let searchParams = new URLSearchParams(window.location.search);
     searchParams.set(field, value);
     const newParams = searchParams.toString();
-    let newUrl = location.href.split('?')[0];
-    history.pushState('', 'Days Behind Italy - COVID19', newUrl += '?' + newParams);
+    history.pushState('', 'Days Behind Italy - COVID19', location.href.split('?')[0] += '?' + newParams);
 }
 
 function getData() {
     $.get("https://pomber.github.io/covid19/timeseries.json", function (data) {
+        console.log(data);
         dataRaw = data;
         dataset = processData();
     }).then(function () {

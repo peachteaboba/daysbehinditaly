@@ -58,6 +58,7 @@ body {
     border-left: 1px solid #20223C;
     border-right: 1px solid #20223C;
     /*width: 800px;*/
+    width: 700px;
 }
 
 .body-wrapper {
@@ -93,8 +94,8 @@ body {
     width: 100%;
     text-align: center;
     font-size: 0.75em;
-    height: 22px;
-    line-height: 22px;
+    height: 24px;
+    line-height: 24px;
     color: white;
 }
 
@@ -104,10 +105,11 @@ body {
     vertical-align: top;
     /* width: 160px; */
     /* outline: 1px dotted blue; */
-    border-right: 10px solid rgba(1, 2, 15, 1);
+    /*border-right: 8px solid rgba(1, 2, 15, 1);*/
     /*padding-bottom: 10px;*/
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
+    margin-right: 4px;
 }
 
 .country-wrapper {
@@ -116,6 +118,7 @@ body {
     vertical-align: top;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
+    margin-left: 4px;
 }
 
 .even {
@@ -146,17 +149,17 @@ body {
     /* background: red; */
     display: inline-block;
     vertical-align: top;
-    margin-top: 7px;
+    margin-top: 10px;
     width: 100%;
 }
 
-.country-title p {
-    display: inline-block;
-    vertical-align: top;
-    width: 100%;
-    font-size: 10px;
-    text-align: center;
-}
+/*.country-title p {*/
+/*    display: inline-block;*/
+/*    vertical-align: top;*/
+/*    width: 100%;*/
+/*    font-size: 10px;*/
+/*    text-align: center;*/
+/*}*/
 
 .country-body {
     /* outline: 1px dotted green; */
@@ -175,31 +178,38 @@ body {
 
 .country-date-title {
     /*outline: 1px dotted blue;*/
-    height: 22px;
-    line-height: 22px;
+    height: 24px;
+    line-height: 24px;
     /* margin-top: 5px; */
     text-align: center;
     font-weight: 900;
     font-size: 11px;
+    /*padding: 0 8px 0 15px;*/
+}
+
+.country-date-title.date {
+    text-align: right;
+    color: black !important;
 }
 
 .country-date .date {
     font-size: 0.75em;
-    height: 22px;
-    line-height: 22px;
-    padding: 0 10px;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 8px 0 15px;
     text-align: right;
-    color: rgba(8, 25, 76, 0.55);
+    color: rgba(8, 25, 76, 0.65);
 }
 
 .country-wrapper .country-date .date {
     text-align: left;
+    padding: 0 15px 0 8px;
 }
 
 .country-date .cases {
     font-size: 0.75em;
-    height: 22px;
-    line-height: 22px;
+    height: 24px;
+    line-height: 24px;
     padding: 0 10px;
     text-align: center;
 }
