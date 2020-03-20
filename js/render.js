@@ -12,7 +12,7 @@ render.dayColumn = function (count) {
     return html.join('');
 };
 
-render.countryColumn = function (data, idx) {
+render.countryColumn = function (data, idx, id) {
     let body = ['<div class="country-body">'];
 
     // Build Date HTML :::::::::::::::::::::::
@@ -22,11 +22,10 @@ render.countryColumn = function (data, idx) {
     date_html.push('<div class="country-date-title date">Date</div>');
     for (let i = 0; i <= data.data.length - 1; i++) {
         let date = new Date(data.data[i]['date']);
+        const moment_date = moment(date);
         date = moment(date).format('ddd, MMM DD');
         let isSameDayClass = '';
-        if (moment(data.data[i]['date']).isSame(moment(), 'day')) {
-            isSameDayClass = ' today';
-        }
+        if (moment_date.isSame(moment(), 'day')) isSameDayClass = ' today';
         const dynamicClass = i % 2 === 0 ? 'date even' + isSameDayClass : 'date' + isSameDayClass;
         date_html.push('<div class="' + dynamicClass + '"> ' + date);
         // Add days forward if needed
@@ -49,7 +48,7 @@ render.countryColumn = function (data, idx) {
             matchClass = ' match';
         }
         const dynamicClass = i % 2 === 0 ? 'cases total even' + matchClass : 'cases total' + matchClass;
-        cases_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['confirmed'] + ' </div>');
+        cases_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['confirmed'].toLocaleString() + ' </div>');
     }
     cases_html.push('</div>');
 
@@ -64,7 +63,7 @@ render.countryColumn = function (data, idx) {
         deaths_html.push('<div class="country-date-title">Deaths</div>');
         for (let i = 0; i <= data['data'].length - 1; i++) {
             const dynamicClass = i % 2 === 0 ? 'cases deaths even ' : 'cases deaths';
-            deaths_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['deaths'] + ' </div>');
+            deaths_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['deaths'].toLocaleString() + ' </div>');
         }
         deaths_html.push('</div>');
         // Render Recovered
@@ -72,7 +71,7 @@ render.countryColumn = function (data, idx) {
         rec_html.push('<div class="country-date-title">Rec</div>');
         for (let i = 0; i <= data.data.length - 1; i++) {
             const dynamicClass = i % 2 === 0 ? 'cases rec even' : 'cases rec';
-            rec_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['recovered'] + ' </div>');
+            rec_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['recovered'].toLocaleString() + ' </div>');
         }
         rec_html.push('</div>');
     }
@@ -90,14 +89,86 @@ render.countryColumn = function (data, idx) {
         body.push(rec_html.join(''));
         body.push(date_html.join(''));
     }
-
     body.push('</div>');
 
+    // Image html
+    let img_html = '';
+    if (typeof id !== "undefined") {
+        const img_src = 'img/' + id + '.png';
+        img_html = '<img src="' + img_src + '" alt="' + data.name + '">';
+    }
+
+    // Days title html
+    let days_title_html = '';
+    if (data['name'] !== 'Italy') {
+        days_title_html = [
+            '<div class="days-total-title" style="color: ' + getDaysColor(data['days']) + '">',
+            data['days'],
+
+            '</div>'
+        ].join('');
+    }
+
     let html = [
-        '<div class="country-title"><h1>' + data.name + '</h1></div>',
+        '<div class="country-title">',
+        '<h1>' + data.name + '</h1>',
+        img_html,
+        days_title_html,
+        '</div>',
         body.join('')
     ];
 
     return html.join('');
-
 };
+
+render.summaryRow = function (data, country) {
+    // console.log('------');
+    // console.log(data);
+    // console.log(country);
+    // console.log(data.id);
+
+    const img_src = 'img/' + data['id'] + '.png';
+
+    let title_html = [
+        '<div class="title">',
+        '<p>' + country['name'] + '</p>',
+        '<img src="' + img_src + '" alt="' + country['name'] + '">',
+        '</div>'
+    ].join('');
+
+    let cases_html = [
+        '<div class="cases">',
+        '<p>Total Cases</p>',
+        '<h1>' + data['latest'].toLocaleString() + '</h1>',
+        '</div>'
+    ].join('');
+
+    let days_html = [
+        '<div class="days">',
+        '<p>Days From Italy</p>',
+        '<h1 style="color: ' + getDaysColor(country['days']) + '">' + country['days'] + '</h1>',
+        '</div>'
+    ].join('');
+
+    let html = [
+        '<div class="summary-el noselect" data-id="' + data['id'] + '">',
+        title_html,
+        cases_html,
+        days_html,
+        '</div>'
+    ];
+
+    return html.join('');
+};
+
+function getDaysColor(days) {
+    let color = '#14C758';
+    if (days <= 7) {
+        color = '#EB443F';
+    } else if (days <= 14) {
+        color = '#FA8050';
+    } else if (days <= 21) {
+        color = '#FBD661';
+    }
+    return color;
+}

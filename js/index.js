@@ -5,13 +5,13 @@ let dataCount = [];
 const displayList = [];
 const ignoreList = ['china', 'korea_south', 'cruise_ship'];
 const minTotal = 100;
-let startingCount = 500;
+let startingCount = 1000;
 let expand = false;
 
 (function init() {
     $(document).ready(function () {
         initControls();
-
+        initTwitter();
 
         getData();
     });
@@ -62,6 +62,17 @@ function urlGenerator(field, value) {
     history.pushState('', 'Days Behind Italy - COVID19', location.href.split('?')[0] += '?' + newParams);
 }
 
+// ---------------------
+// ------ TWITTER ------
+// ---------------------
+function initTwitter() {
+    const twitterEl = $('#tweet-hashtag-wrapper');
+    if (twitterEl) twitterEl.show();
+
+    const twitterEmbedEl = $('#tweet-embeds');
+    if (twitterEmbedEl) twitterEmbedEl.show();
+}
+
 function getData() {
     $.get("https://pomber.github.io/covid19/timeseries.json", function (data) {
         // console.log(data);
@@ -92,7 +103,7 @@ function processData() {
                     }
                 }
             }
-            const id = prop.toLowerCase().replace(' ', '_').replace(',', '');
+            const id = prop.replace(/\s+/g, '_').toLowerCase().replace(/[^\w\s]/gi, '');
             if (arr.length > 0 && latest >= minTotal) {
                 if (displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') {
                     // Skip this
@@ -176,6 +187,7 @@ function processData() {
                         days: daysForward
                     });
                 }
+                country['days'] = daysForward;
             }
         }
     }
@@ -183,6 +195,7 @@ function processData() {
     // Proceed to render
     dataset = processed;
     renderList();
+    renderSummary();
 }
 
 function renderList() {
@@ -194,7 +207,7 @@ function renderList() {
         if (el.id !== 'italy' && dataset[el.id] && dataset[el.id].data) {
             // Create body wrapper div
             html_arr.push([
-                '<div class="body-wrapper">',
+                '<div class="body-wrapper" data-id="' + el.id + '">',
                 // Render day element
                 '<div class="day-wrapper">',
                 render.dayColumn(dataset['italy'].count),
@@ -205,13 +218,43 @@ function renderList() {
                 '</div>',
                 // Render country element
                 '<div class="country-wrapper">',
-                render.countryColumn(dataset[el.id], dataset[el.id]['idx']),
+                render.countryColumn(dataset[el.id], dataset[el.id]['idx'], el.id),
                 '</div>',
                 '</div>'
             ].join(''));
         }
     });
     bodyEl.html(html_arr.join(''));
+}
+
+function renderSummary() {
+    // console.log(dataCount);
+
+    // Reset div
+    const summaryEl = $('#summary-wrapper');
+    summaryEl.html('');
+
+    let html_arr = [];
+    dataCount.forEach(function (el) {
+        if (el.id !== 'italy' && dataset[el.id] && dataset[el.id].data) {
+            // Create body wrapper div
+            html_arr.push([
+                render.summaryRow(el, dataset[el.id])
+            ].join(''));
+        }
+    });
+    summaryEl.html(html_arr.join(''));
+
+    // Assign event handlers
+    $('.summary-el').on('click', function () {
+        const id = $(this).attr('data-id');
+        const targetEl = $('.body-wrapper[data-id="' + id + '"]');
+        if (id && targetEl) {
+            $([document.documentElement, document.body]).animate({
+                scrollTop: targetEl.offset().top - 40
+            }, 1000);
+        }
+    });
 }
 
 
