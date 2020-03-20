@@ -192,6 +192,13 @@ function processData() {
         }
     }
 
+    // Fix italy data bug
+    processed['italy']['data'].forEach(function (el) {
+        if (el['date'] === '2020-3-12') {
+            el['confirmed'] = 15113;
+        }
+    });
+
     // Proceed to render
     dataset = processed;
     renderList();
