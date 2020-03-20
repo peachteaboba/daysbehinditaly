@@ -145,7 +145,7 @@ render.summaryRow = function (data, country) {
 
     let days_html = [
         '<div class="days">',
-        '<p>Days From Italy</p>',
+        '<p>Days Behind Italy</p>',
         '<h1 style="color: ' + getDaysColor(country['days']) + '">' + country['days'] + '</h1>',
         '</div>'
     ].join('');
