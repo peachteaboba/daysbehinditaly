@@ -1,11 +1,13 @@
 let dataRaw;
 let dataset = {};
 let dataCount = [];
+let dataCountryCache = {};
+
 // const displayList = ['united_kingdom'];
 const displayList = [];
 const ignoreList = ['china', 'korea_south', 'cruise_ship'];
 const minTotal = 100;
-let startingCount = 1000;
+let startingCount = 3000;
 let expand = false;
 
 (function init() {
@@ -67,7 +69,6 @@ function urlGenerator(field, value) {
 function initTwitter() {
     const twitterEl = $('#tweet-hashtag-wrapper');
     if (twitterEl) twitterEl.show();
-
     const twitterEmbedEl = $('#tweet-embeds');
     if (twitterEmbedEl) twitterEmbedEl.show();
 }
@@ -88,48 +89,54 @@ function initProcessData() {
     const img_src = 'img/gif/spinner-w.svg';
     bodyEl.html('<div class="loading-wrapper"><img src="' + img_src + '" alt="Loading"></div>');
     processData(function () {
-        setTimeout(function () {
-            renderList();
-            renderSummary();
-        }, 250);
+        renderSummary();
+        renderList();
     });
 }
 
 function processData(cb) {
     dataCount = [];
     dataset = [];
+    dataCountryCache = {};
     let obj = dataRaw;
     let processed = {};
     for (let prop in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-            // Remove under 100 cases
-            let arr = [];
-            let latest = 0;
-            if (obj[prop] && obj[prop].length > 0) {
-                for (let i = 0; i < obj[prop].length; i++) {
-                    if (obj[prop][i]['confirmed'] >= startingCount) {
-                        arr.push(obj[prop][i]);
-                        if (i === obj[prop].length - 1) {
-                            latest = obj[prop][i]['confirmed'];
+            const id = prop.replace(/\s+/g, '_').toLowerCase().replace(/[^\w\s]/gi, '');
+            if (displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') {
+                // Skip this country
+            } else {
+                // Add to list
+                let arr = [];
+                let latest = 0;
+                if (obj[prop] && obj[prop].length > 0) {
+                    dataCountryCache[id] = {};
+                    for (let i = 0; i < obj[prop].length; i++) {
+                        if (obj[prop][i]['confirmed'] >= startingCount) {
+                            arr.push(obj[prop][i]);
+                            if (i === obj[prop].length - 1) {
+                                latest = obj[prop][i]['confirmed'];
+                            }
                         }
+                        // Add to country cache
+                        dataCountryCache[id][obj[prop][i]['date']] = obj[prop][i];
                     }
                 }
-            }
-            const id = prop.replace(/\s+/g, '_').toLowerCase().replace(/[^\w\s]/gi, '');
-            if (arr.length > 0 && latest >= minTotal) {
-                if (displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') {
-                    // Skip this
-                } else if (ignoreList.indexOf(id) === -1) {
-                    processed[id] = {
-                        name: prop,
-                        data: arr,
-                        count: arr.length,
-                        latest: latest
-                    };
-                    dataCount.push({
-                        id: id,
-                        latest: latest
-                    });
+                if (arr.length > 0 && latest >= minTotal) {
+                    if (displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') {
+                        // Skip this
+                    } else if (ignoreList.indexOf(id) === -1) {
+                        processed[id] = {
+                            name: prop,
+                            data: arr,
+                            count: arr.length,
+                            latest: latest
+                        };
+                        dataCount.push({
+                            id: id,
+                            latest: latest
+                        });
+                    }
                 }
             }
         }
@@ -172,11 +179,14 @@ function processData(cb) {
                         daysBehind++;
                         let d = new Date(earliestDate);
                         d.setDate(d.getDate() - daysBehind);
+                        // Get formatted date
+                        const formattedDate = moment(d).format('YYYY-M-D');
+                        const countryDataRaw = dataCountryCache[prop][formattedDate] || {};
                         countryData.unshift({
                             date: d,
-                            confirmed: '-',
-                            deaths: '-',
-                            recovered: '-'
+                            confirmed: countryDataRaw['confirmed'] || '-',
+                            deaths: countryDataRaw['deaths'] || '-',
+                            recovered: countryDataRaw['recovered'] || '-'
                         });
                     }
                     country['data'] = countryData;
@@ -229,12 +239,20 @@ function processData(cb) {
             let country = processed[prop];
             let data = {};
             let dataPrev = {};
+            const max = country['latest'];
             for (let i = 0; i < country['data'].length; i++) {
                 data = country['data'][i];
+
+                // Calculate daily percentage increase
                 dataPrev = country['data'][i - 1];
                 if (data && dataPrev && typeof data['confirmed'] === "number" && typeof dataPrev['confirmed'] === "number") {
                     // Calculate percentage increase from previous day
                     country['data'][i]['increase_p'] = Math.round(((data['confirmed'] - dataPrev['confirmed']) / data['confirmed']) * 100);
+                }
+
+                // Calculate percentage of total
+                if (data && typeof data['confirmed'] === "number") {
+                    country['data'][i]['total_p'] = (100 - (((max - data['confirmed']) / max) * 100)).toFixed(2);
                 }
             }
         }
@@ -247,7 +265,6 @@ function processData(cb) {
 
 function renderList() {
     const bodyEl = $('#body');
-    bodyEl.html('');
 
     let html_arr = [];
     dataCount.forEach(function (el) {
@@ -271,7 +288,16 @@ function renderList() {
             ].join(''));
         }
     });
-    bodyEl.html(html_arr.join(''));
+    bodyEl.append([
+        '<div id="body-content-wrapper" class="hide">',
+        html_arr.join(''),
+        '</div>'
+    ].join(''));
+
+    setTimeout(function () {
+        $('#body .loading-wrapper').html('');
+        $('#body-content-wrapper').removeClass('hide').addClass('show');
+    }, 500);
 }
 
 function renderSummary() {

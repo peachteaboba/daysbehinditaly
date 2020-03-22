@@ -38,15 +38,11 @@ render.countryColumn = function (data, idx, id) {
         // --------------------------
         const days = data.data[i]['days'];
         if (data['name'] !== 'Italy' && typeof days !== "undefined") {
-
             if (days === 0) {
                 date_html.push('<div class="days-forward">Today</div>');
             } else {
                 date_html.push('<div class="days-forward">+ ' + days + ' days</div>');
             }
-
-
-
         }
         date_html.push('</div>');
     }
@@ -72,7 +68,15 @@ render.countryColumn = function (data, idx, id) {
         let dynamicClass = i % 2 === 0 ? 'cases total even' + matchClass : 'cases total' + matchClass;
         if (data['name'] === 'Italy') dynamicClass += ' italy';
 
-        cases_html.push('<div class="' + dynamicClass + '"> ' + arrow_html + data.data[i]['confirmed'].toLocaleString() + ' </div>');
+        // ------------------
+        // Build progress bar
+        // ------------------
+        let progress_bar_html = '';
+        if (typeof data.data[i]['total_p'] !== "undefined") {
+            progress_bar_html = '<div class="progress-bar-wrapper"><div class="progress-bar" style="width: ' + data.data[i]['total_p'] + '%;"></div></div>';
+        }
+
+        cases_html.push('<div class="' + dynamicClass + '"> ' + progress_bar_html + arrow_html + '<p>' + data.data[i]['confirmed'].toLocaleString() + '</p> </div>');
     }
     cases_html.push('</div>');
 

@@ -41,9 +41,6 @@ body {
 }
 
 
-
-
-
 .center-wrapper {
     /*outline: 1px dotted blue;*/
     /*display: inline-block;*/
@@ -53,10 +50,11 @@ body {
     height: 50px;
     width: 50px;
     /*outline: 1px dotted blue;*/
-    position: absolute;
+    position: fixed;
     top: 200px;
     left: calc(50% - 25px);
 }
+
 .loading-wrapper img {
     height: 100%;
     width: 100%;
@@ -73,7 +71,27 @@ body {
     /*border-left: 1px solid #20223C;*/
     /*border-right: 1px solid #20223C;*/
     /*width: 800px;*/
-    min-width: 600px;
+    min-width: 700px;
+}
+
+#body .hide {
+    visibility: hidden;
+}
+
+#body-content-wrapper {
+    position: relative;
+    top: 60px;
+    opacity: 0;
+
+    -moz-transition: top 0.25s, opacity 0.25s, -moz-transform ease-in-out 0.25s;
+    -webkit-transition: top 0.25s, opacity 0.25s, -moz-transform ease-in-out 0.25s;
+    -o-transition: top 0.25s, opacity 0.25s, -moz-transform ease-in-out 0.25s;
+    transition: top 0.25s, opacity 0.25s, -moz-transform ease-in-out 0.25s;
+}
+
+#body .show {
+    opacity: 1;
+    top: 0;
 }
 
 .body-wrapper {
@@ -94,7 +112,7 @@ body {
     display: inline-block;
     vertical-align: top;
     width: 40px;
-     /*outline: 1px dotted blue;*/
+    /*outline: 1px dotted blue;*/
     padding-top: 50px;
 }
 
@@ -138,6 +156,7 @@ body {
 .even {
     background: rgba(8, 25, 76, 0.04);
 }
+
 .today {
     /*background: rgba(255, 227, 0, 0.45);*/
     /*font-weight: 900;*/
@@ -236,7 +255,7 @@ body {
 /*}*/
 
 .country-body {
-     /*outline: 1px dotted green;*/
+    /*outline: 1px dotted green;*/
     min-height: 60px;
     position: relative;
     background: white;
@@ -290,20 +309,47 @@ body {
     line-height: 24px;
     padding: 0 10px;
     /*text-align: left;*/
-    min-width: 60px;
+    min-width: 50px;
     position: relative;
 }
 
 .country-date .cases.total {
-    font-weight: 900;
-    text-align: left;
-    padding: 0 13px 0 15px;
+
+    /*text-align: left;*/
+    padding: 0 23px 0 25px;
 }
 
 .country-date .cases.total.italy {
-    text-align: right;
-    padding: 0 15px 0 13px;
+    /*text-align: right;*/
+    padding: 0 25px 0 23px;
 }
+
+.country-date .cases.total .progress-bar-wrapper {
+    position: absolute;
+    top: 0;
+    left: 5px;
+    height: 100%;
+    width: calc(100% - 10px);
+    /*outline: 1px dotted red;*/
+}
+
+.country-date .cases.total .progress-bar {
+    position: absolute;
+    top: 15%;
+    left: 0;
+    max-width: 100%;
+    height: 70%;
+    background: #fcb842;
+    z-index: 0;
+}
+
+.country-date .cases.total p {
+    position: relative;
+    z-index: 10;
+    font-size: 1em;
+    font-weight: 900;
+}
+
 
 
 
@@ -333,9 +379,6 @@ body {
     line-height: 24px;
     width: 50px;
 }
-
-
-
 
 
 /* CONTROLS */
@@ -379,7 +422,6 @@ body {
     vertical-align: top;
     display: inline-block;
     width: 200px;
-
 }
 
 .slide-container p {
@@ -395,11 +437,13 @@ body {
     width: 100%;
     height: 4px;
     border-radius: 2px;
-    background: #ECF2FA;
+    background: #717B94;
     outline: none;
-    /*opacity: 0.5;*/
-    -webkit-transition: .2s;
-    transition: opacity .2s;
+
+    -moz-transition: background 0.5s, -moz-transform ease-in-out 0.25s;
+    -webkit-transition: background 0.5s, -moz-transform ease-in-out 0.25s;
+    -o-transition: background 0.5s, -moz-transform ease-in-out 0.25s;
+    transition: background 0.5s, -moz-transform ease-in-out 0.25s;
 }
 
 .slider::-webkit-slider-thumb {
@@ -418,6 +462,10 @@ body {
     border-radius: 50%;
     background: #388CFB;
     cursor: pointer;
+}
+
+.slider:active {
+    background: white;
 }
 
 /* Mouse-over effects */
@@ -460,6 +508,7 @@ body {
     width: 50px;
     height: 24px;
 }
+
 .toggle-slider {
     position: absolute;
     cursor: pointer;
@@ -491,10 +540,10 @@ body {
 input:checked + .toggle-slider {
     background-color: #388CFB;
 }
+
 input:checked + .toggle-slider:before {
     transform: translateX(22px);
 }
-
 
 
 /* SUMMARY WRAPPER */
@@ -604,8 +653,6 @@ input:checked + .toggle-slider:before {
     margin-top: 10px;
     /*font-weight: 900;*/
 }
-
-
 
 
 /* TWITTER */

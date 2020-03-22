@@ -1,12 +1,6 @@
-@media screen and (max-width: 500px) {
-    .top-header .left {
-        width: 100%;
-        text-align: center;
-        margin-left: 0;
+@media screen and (max-width: 1000px) {
+    #body {
+        /*outline: 5px solid red;*/
+        /*margin-top: 100px;*/
     }
-
-    .top-header .right {
-        display: none;
-    }
-
 }
