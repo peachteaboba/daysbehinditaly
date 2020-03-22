@@ -160,8 +160,9 @@ body {
 .today {
     /*background: rgba(255, 227, 0, 0.45);*/
     /*font-weight: 900;*/
-    background: rgba(23, 140, 247, 0.3);
-
+    /*background: rgba(23, 140, 247, 0.3);*/
+    color: black !important;
+    font-weight: bold;
 }
 
 .arrow-left {
@@ -350,14 +351,28 @@ body {
     font-weight: 900;
 }
 
-
-
-
 .country-date .cases.percentage {
     padding: unset;
-    width: 50px;
+    width: 42px;
     min-width: unset;
     text-align: center;
+}
+
+.country-date .cases.percentage p {
+    font-weight: 900;
+    color: black;
+    position: relative;
+    z-index: 1;
+    font-size: 0.9em;
+}
+
+.country-date .cases.percentage .percentage-color {
+    position: absolute;
+    top: 15%;
+    left: 0;
+    height: 70%;
+    width: 100%;
+    z-index: 0;
 }
 
 .country-date .cases.deaths {

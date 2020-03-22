@@ -86,7 +86,6 @@ render.countryColumn = function (data, idx, id) {
     percentage_html.push('<div class="country-date">');
     percentage_html.push('<div class="country-date-title">+ %</div>');
     for (let i = 0; i <= data['data'].length - 1; i++) {
-
         // -------------------------------------------
         // Display percentage change from previous day
         // -------------------------------------------
@@ -97,10 +96,9 @@ render.countryColumn = function (data, idx, id) {
             percentage_change_html = '+' + data.data[i]['increase_p'] + '%';
             style = ' style="background: ' + getIncreasePercentageColor(data.data[i]['increase_p']) + ';"';
         }
-        percentage_html.push('<div class="' + dynamicClass + '" ' + style + '>' + percentage_change_html + '</div>');
+        percentage_html.push('<div class="' + dynamicClass + '"><div class="percentage-color" ' + style + '></div><p>' + percentage_change_html + '</p></div>');
     }
     percentage_html.push('</div>');
-
 
     // Build Deaths / Rec HTML :::::::::::::::
     // :::::::::::::::::::::::::::::::::::::::
@@ -230,11 +228,11 @@ function getIncreasePercentageColor(p) {
     if (p >= 30) {
         color = 'rgba(235, 68, 63, 0.45)';
     } else if (p >= 20) {
-        color = 'rgba(255, 125, 0, 0.35)';
+        color = 'rgba(255, 125, 0, 0.4)';
     } else if (p >= 10) {
-        color = 'rgba(251, 214, 97, 0.35)';
+        color = 'rgba(251, 214, 97, 0.6)';
     } else {
-        color = 'rgba(20, 199, 88, 0.35)';
+        color = 'rgba(20, 199, 88, 0.4)';
     }
     return color;
 }
