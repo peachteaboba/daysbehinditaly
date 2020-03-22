@@ -1,7 +1,7 @@
 let dataRaw;
 let dataset = {};
 let dataCount = [];
-// const displayList = ['us', 'united_kingdom'];
+// const displayList = ['united_kingdom'];
 const displayList = [];
 const ignoreList = ['china', 'korea_south', 'cruise_ship'];
 const minTotal = 100;
@@ -12,7 +12,6 @@ let expand = false;
     $(document).ready(function () {
         initControls();
         initTwitter();
-
         getData();
     });
 })();
@@ -33,14 +32,14 @@ function initControls() {
     }).on('change', function () {
         setTimeout(function () {
             urlGenerator('starting', startingCount);
-            processData();
+            initProcessData();
         }, 500);
     }).val(startingCount);
 
     $('#expand').on('change', function () {
         expand = $(this).is(":checked");
         urlGenerator('expand', expand ? '1' : '0');
-        processData();
+        initProcessData();
     });
 
     // Set initial values
@@ -77,13 +76,26 @@ function getData() {
     $.get("https://pomber.github.io/covid19/timeseries.json", function (data) {
         // console.log(data);
         dataRaw = data;
-        processData();
+        initProcessData();
     }).then(function () {
         // Done
     });
 }
 
-function processData() {
+function initProcessData() {
+    // Display loading gif
+    const bodyEl = $('#body');
+    const img_src = 'img/gif/spinner-w.svg';
+    bodyEl.html('<div class="loading-wrapper"><img src="' + img_src + '" alt="Loading"></div>');
+    processData(function () {
+        setTimeout(function () {
+            renderList();
+            renderSummary();
+        }, 250);
+    });
+}
+
+function processData(cb) {
     dataCount = [];
     dataset = [];
     let obj = dataRaw;
@@ -175,10 +187,9 @@ function processData() {
                 countryData = country['data'];
                 let daysForward = 0;
                 const latestDate = countryData[countryData.length - 1]['date'];
-                while (countryData.length !== italyData.length) {
-                    daysForward++;
+                while (countryData.length !== italyData.length + 1) {
                     let d = new Date(latestDate);
-                    d.setDate(d.getDate() + daysForward);
+                    d.setDate(d.getDate() + daysForward + 1);
                     countryData.push({
                         date: d,
                         confirmed: '-',
@@ -186,23 +197,52 @@ function processData() {
                         recovered: '-',
                         days: daysForward
                     });
+                    daysForward++;
                 }
-                country['days'] = daysForward;
+                country['days'] = daysForward - 1;
             }
         }
     }
 
-    // Fix italy data bug
+    // Fix Italy data bug
     processed['italy']['data'].forEach(function (el) {
         if (el['date'] === '2020-3-12') {
             el['confirmed'] = 15113;
         }
     });
 
+    // Add end buffer date to Italy
+    let lastItalyDate = new Date(processed['italy']['data'][processed['italy']['data'].length - 1]['date']);
+    lastItalyDate.setDate(lastItalyDate.getDate() + 1);
+    processed['italy']['data'].push({
+        date: lastItalyDate,
+        confirmed: '-',
+        deaths: '-',
+        recovered: '-'
+    });
+
+    // -------------------------------------------------
+    // ------------ Calculate Percentages --------------
+    // -------------------------------------------------
+    for (let prop in processed) {
+        if (Object.prototype.hasOwnProperty.call(processed, prop)) {
+            let country = processed[prop];
+            let data = {};
+            let dataPrev = {};
+            for (let i = 0; i < country['data'].length; i++) {
+                data = country['data'][i];
+                dataPrev = country['data'][i - 1];
+                if (data && dataPrev && typeof data['confirmed'] === "number" && typeof dataPrev['confirmed'] === "number") {
+                    // Calculate percentage increase from previous day
+                    country['data'][i]['increase_p'] = Math.round(((data['confirmed'] - dataPrev['confirmed']) / data['confirmed']) * 100);
+                }
+            }
+        }
+    }
+
     // Proceed to render
     dataset = processed;
-    renderList();
-    renderSummary();
+    cb();
 }
 
 function renderList() {

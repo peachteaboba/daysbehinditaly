@@ -49,6 +49,19 @@ body {
     /*display: inline-block;*/
 }
 
+.loading-wrapper {
+    height: 50px;
+    width: 50px;
+    /*outline: 1px dotted blue;*/
+    position: absolute;
+    top: 200px;
+    left: calc(50% - 25px);
+}
+.loading-wrapper img {
+    height: 100%;
+    width: 100%;
+}
+
 #body {
     display: inline-block;
     vertical-align: top;
@@ -57,8 +70,8 @@ body {
     text-align: center;
     padding: 20px 20px 20px 20px;
     /*max-width: 800px;*/
-    border-left: 1px solid #20223C;
-    border-right: 1px solid #20223C;
+    /*border-left: 1px solid #20223C;*/
+    /*border-right: 1px solid #20223C;*/
     /*width: 800px;*/
     min-width: 600px;
 }
@@ -111,27 +124,52 @@ body {
     /*padding-bottom: 10px;*/
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
-    margin-right: 4px;
+    margin-right: 6px;
 }
 
 .country-wrapper {
     /*background: white;*/
     display: inline-block;
     vertical-align: top;
-    margin-left: 4px;
     margin-right: 50px;
+    margin-left: 6px;
 }
 
 .even {
     background: rgba(8, 25, 76, 0.04);
 }
 .today {
-    background: rgba(255, 227, 0, 0.45);
+    /*background: rgba(255, 227, 0, 0.45);*/
+    /*font-weight: 900;*/
+    background: rgba(23, 140, 247, 0.3);
+
+}
+
+.arrow-left {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    /*height: 20px;*/
+    /*width: 20px;*/
+    /*background: red;*/
+
+    width: 0;
+    height: 0;
+    border-top: 12px solid transparent;
+    border-right: 12px solid white;
+    border-bottom: 12px solid transparent;
+
+}
+
+.even .arrow-left {
+    border-right: 12px solid #f5f6f8;
+    /*background: rgba(8, 25, 76, 0.04);*/
 }
 
 .match {
     /*outline: 2px solid rgba(29, 208, 98, 0.45);*/
-    background: rgba(23, 140, 247, 0.3);
+    /*background: rgba(23, 140, 247, 0.3);*/
+    /*border-bottom: 4px solid red;*/
 }
 
 /*.even-it {*/
@@ -227,7 +265,7 @@ body {
 }
 
 .country-date-title.date {
-    text-align: right;
+    text-align: center !important;
     color: black !important;
 }
 
@@ -251,12 +289,29 @@ body {
     height: 24px;
     line-height: 24px;
     padding: 0 10px;
-    text-align: center;
+    /*text-align: left;*/
     min-width: 60px;
+    position: relative;
 }
 
 .country-date .cases.total {
     font-weight: 900;
+    text-align: left;
+    padding: 0 13px 0 15px;
+}
+
+.country-date .cases.total.italy {
+    text-align: right;
+    padding: 0 15px 0 13px;
+}
+
+
+
+.country-date .cases.percentage {
+    padding: unset;
+    width: 50px;
+    min-width: unset;
+    text-align: center;
 }
 
 .country-date .cases.deaths {

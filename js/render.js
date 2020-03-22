@@ -5,7 +5,7 @@ render.dayColumn = function (count) {
     let html = [
         '<div class="day-title">Day</div>'
     ];
-    for (let i = 1; i <= count; i++) {
+    for (let i = 1; i <= count + 1; i++) {
         const dynamicClass = i % 2 !== 0 ? 'even' : '';
         html.push('<div class="' + dynamicClass + '"> ' + i + ' </div>');
     }
@@ -21,6 +21,10 @@ render.countryColumn = function (data, idx, id) {
     date_html.push('<div class="country-date">');
     date_html.push('<div class="country-date-title date">Date</div>');
     for (let i = 0; i <= data.data.length - 1; i++) {
+
+        // ---------------------------------
+        // Set dynamic classes based on date
+        // ---------------------------------
         let date = new Date(data.data[i]['date']);
         const moment_date = moment(date);
         date = moment(date).format('ddd, MMM DD');
@@ -28,10 +32,21 @@ render.countryColumn = function (data, idx, id) {
         if (moment_date.isSame(moment(), 'day')) isSameDayClass = ' today';
         const dynamicClass = i % 2 === 0 ? 'date even' + isSameDayClass : 'date' + isSameDayClass;
         date_html.push('<div class="' + dynamicClass + '"> ' + date);
+
+        // --------------------------
         // Add days forward if needed
+        // --------------------------
         const days = data.data[i]['days'];
         if (data['name'] !== 'Italy' && typeof days !== "undefined") {
-            date_html.push('<div class="days-forward">+ ' + days + ' days</div>');
+
+            if (days === 0) {
+                date_html.push('<div class="days-forward">Today</div>');
+            } else {
+                date_html.push('<div class="days-forward">+ ' + days + ' days</div>');
+            }
+
+
+
         }
         date_html.push('</div>');
     }
@@ -43,14 +58,45 @@ render.countryColumn = function (data, idx, id) {
     cases_html.push('<div class="country-date">');
     cases_html.push('<div class="country-date-title">Cases</div>');
     for (let i = 0; i <= data['data'].length - 1; i++) {
+        // ---------------------------------
+        // Set dynamic classes based on data
+        // ---------------------------------
         let matchClass = '';
+        let arrow_html = '';
         if (idx && i === idx) {
             matchClass = ' match';
+            if (data['name'] !== 'Italy') {
+                arrow_html = '<div class="arrow-left"></div>';
+            }
         }
-        const dynamicClass = i % 2 === 0 ? 'cases total even' + matchClass : 'cases total' + matchClass;
-        cases_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['confirmed'].toLocaleString() + ' </div>');
+        let dynamicClass = i % 2 === 0 ? 'cases total even' + matchClass : 'cases total' + matchClass;
+        if (data['name'] === 'Italy') dynamicClass += ' italy';
+
+        cases_html.push('<div class="' + dynamicClass + '"> ' + arrow_html + data.data[i]['confirmed'].toLocaleString() + ' </div>');
     }
     cases_html.push('</div>');
+
+    // Build Percentage HTML :::::::::::::::::
+    // :::::::::::::::::::::::::::::::::::::::
+    let percentage_html = [];
+    percentage_html.push('<div class="country-date">');
+    percentage_html.push('<div class="country-date-title">+ %</div>');
+    for (let i = 0; i <= data['data'].length - 1; i++) {
+
+        // -------------------------------------------
+        // Display percentage change from previous day
+        // -------------------------------------------
+        let dynamicClass = i % 2 === 0 ? 'cases percentage even' : 'cases percentage';
+        let style = '';
+        let percentage_change_html = '';
+        if (typeof data.data[i]['increase_p'] !== "undefined") {
+            percentage_change_html = '+' + data.data[i]['increase_p'] + '%';
+            style = ' style="background: ' + getIncreasePercentageColor(data.data[i]['increase_p']) + ';"';
+        }
+        percentage_html.push('<div class="' + dynamicClass + '" ' + style + '>' + percentage_change_html + '</div>');
+    }
+    percentage_html.push('</div>');
+
 
     // Build Deaths / Rec HTML :::::::::::::::
     // :::::::::::::::::::::::::::::::::::::::
@@ -82,9 +128,11 @@ render.countryColumn = function (data, idx, id) {
         body.push(date_html.join(''));
         body.push(rec_html.join(''));
         body.push(deaths_html.join(''));
+        body.push(percentage_html.join(''));
         body.push(cases_html.join(''));
     } else {
         body.push(cases_html.join(''));
+        body.push(percentage_html.join(''));
         body.push(deaths_html.join(''));
         body.push(rec_html.join(''));
         body.push(date_html.join(''));
@@ -169,6 +217,20 @@ function getDaysColor(days) {
         color = '#FA8050';
     } else if (days <= 21) {
         color = '#FBD661';
+    }
+    return color;
+}
+
+function getIncreasePercentageColor(p) {
+    let color;
+    if (p >= 30) {
+        color = 'rgba(235, 68, 63, 0.45)';
+    } else if (p >= 20) {
+        color = 'rgba(255, 125, 0, 0.35)';
+    } else if (p >= 10) {
+        color = 'rgba(251, 214, 97, 0.35)';
+    } else {
+        color = 'rgba(20, 199, 88, 0.35)';
     }
     return color;
 }
