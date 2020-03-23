@@ -7,13 +7,14 @@ render.dayColumn = function (count) {
     ];
     for (let i = 1; i <= count + 1; i++) {
         const dynamicClass = i % 2 !== 0 ? 'even' : '';
-        html.push('<div class="' + dynamicClass + '"> ' + i + ' </div>');
+        html.push('<div class="' + dynamicClass + '"> ' + (i === count + 1 ? 'Today' : i) + ' </div>');
     }
     return html.join('');
 };
 
 render.countryColumn = function (data, idx, id) {
     let body = ['<div class="country-body">'];
+    // console.log(data);
 
     // Build Date HTML :::::::::::::::::::::::
     // :::::::::::::::::::::::::::::::::::::::
@@ -25,7 +26,7 @@ render.countryColumn = function (data, idx, id) {
         // ---------------------------------
         // Set dynamic classes based on date
         // ---------------------------------
-        let date = new Date(data.data[i]['date']);
+        let date = generateNewDate(data.data[i]['date']);
         const moment_date = moment(date);
         date = moment(date).format('ddd, MMM DD');
         let isSameDayClass = '';
@@ -52,8 +53,9 @@ render.countryColumn = function (data, idx, id) {
     // :::::::::::::::::::::::::::::::::::::::
     let cases_html = [];
     cases_html.push('<div class="country-date">');
-    cases_html.push('<div class="country-date-title">Cases</div>');
+    cases_html.push('<div class="country-date-title">' + (weighted ? 'Cases/1M' : 'Cases') + '</div>');
     for (let i = 0; i <= data['data'].length - 1; i++) {
+
         // ---------------------------------
         // Set dynamic classes based on data
         // ---------------------------------
@@ -76,7 +78,16 @@ render.countryColumn = function (data, idx, id) {
             progress_bar_html = '<div class="progress-bar-wrapper"><div class="progress-bar" style="width: ' + data.data[i]['total_p'] + '%;"></div></div>';
         }
 
-        cases_html.push('<div class="' + dynamicClass + '"> ' + progress_bar_html + arrow_html + '<p>' + data.data[i]['confirmed'].toLocaleString() + '</p> </div>');
+        if (weighted) {
+            // ----------------
+            // Process weighted
+            // ----------------
+            let weightedConfirmed = (data.data[i]['confirmed'] / data['millions']).toFixed(2);
+            if (weightedConfirmed === "NaN") weightedConfirmed = '-';
+            cases_html.push('<div class="' + dynamicClass + '"> ' + progress_bar_html + arrow_html + '<p>' + weightedConfirmed.toLocaleString() + '</p> </div>');
+        } else {
+            cases_html.push('<div class="' + dynamicClass + '"> ' + progress_bar_html + arrow_html + '<p>' + data.data[i]['confirmed'].toLocaleString() + '</p> </div>');
+        }
     }
     cases_html.push('</div>');
 
@@ -108,18 +119,30 @@ render.countryColumn = function (data, idx, id) {
     if (expand) {
         // Render Deaths
         deaths_html.push('<div class="country-date">');
-        deaths_html.push('<div class="country-date-title">Deaths</div>');
+        deaths_html.push('<div class="country-date-title">' + (weighted ? 'Deaths/1M' : 'Deaths') + '</div>');
         for (let i = 0; i <= data['data'].length - 1; i++) {
             const dynamicClass = i % 2 === 0 ? 'cases deaths even ' : 'cases deaths';
-            deaths_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['deaths'].toLocaleString() + ' </div>');
+            if (weighted) {
+                let weightedDeaths = (data.data[i]['deaths'] / data['millions']).toFixed(2);
+                if (weightedDeaths === "NaN") weightedDeaths = '-';
+                deaths_html.push('<div class="' + dynamicClass + '"> ' + weightedDeaths.toLocaleString() + ' </div>');
+            } else {
+                deaths_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['deaths'].toLocaleString() + ' </div>');
+            }
         }
         deaths_html.push('</div>');
         // Render Recovered
         rec_html.push('<div class="country-date">');
-        rec_html.push('<div class="country-date-title">Rec</div>');
+        rec_html.push('<div class="country-date-title">' + (weighted ? 'Rec/1M' : 'Rec') + '</div>');
         for (let i = 0; i <= data.data.length - 1; i++) {
             const dynamicClass = i % 2 === 0 ? 'cases rec even' : 'cases rec';
-            rec_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['recovered'].toLocaleString() + ' </div>');
+            if (weighted) {
+                let weightedRecs = (data.data[i]['recovered'] / data['millions']).toFixed(2);
+                if (weightedRecs === "NaN") weightedRecs = '-';
+                rec_html.push('<div class="' + dynamicClass + '"> ' + weightedRecs.toLocaleString() + ' </div>');
+            } else {
+                rec_html.push('<div class="' + dynamicClass + '"> ' + data.data[i]['recovered'].toLocaleString() + ' </div>');
+            }
         }
         rec_html.push('</div>');
     }
@@ -159,11 +182,22 @@ render.countryColumn = function (data, idx, id) {
         ].join('');
     }
 
+    // Calculate how many times italy
+    let multiples_html = '<span> - </span>';
+    const italyPop = dataFixture.population['italy'];
+    const numMultiples = (data.population / italyPop).toFixed(2);
+    if (data['name'] !== 'Italy') {
+        multiples_html = numMultiples + '<span> times Italy</span>';
+    }
+
     let html = [
         '<div class="country-title">',
+        '<div class="country-title-text-wrapper">',
         '<h1>' + data.name + '</h1>',
+        '<p><span>Population · </span>' + abbreviateNumber(data.population) + '<br>' + multiples_html + '</p>',
         img_html,
         days_title_html,
+        '</div>',
         '</div>',
         body.join('')
     ];
@@ -171,7 +205,7 @@ render.countryColumn = function (data, idx, id) {
     return html.join('');
 };
 
-render.summaryRow = function (data, country) {
+render.summaryRow = function (data, country, isFilter) {
     // console.log('------');
     // console.log(data);
     // console.log(country);
@@ -186,22 +220,29 @@ render.summaryRow = function (data, country) {
         '</div>'
     ].join('');
 
-    let cases_html = [
-        '<div class="cases">',
-        '<p>Total Cases</p>',
-        '<h1>' + data['latest'].toLocaleString() + '</h1>',
-        '</div>'
-    ].join('');
+    let cases_html = '';
+    if (!isFilter) {
+        cases_html = [
+            '<div class="cases">',
+            '<p>' + (weighted ? 'Cases / 1M' : 'Total Cases') + '</p>',
+            '<h1>' + (weighted ? data['weighted'].toLocaleString() : data['latest'].toLocaleString()) + '</h1>',
+            '</div>'
+        ].join('');
+    }
 
-    let days_html = [
-        '<div class="days">',
-        '<p>Days Behind Italy</p>',
-        '<h1 style="color: ' + getDaysColor(country['days']) + '">' + country['days'] + '</h1>',
-        '</div>'
-    ].join('');
+    let days_html = '';
+    if (!isFilter) {
+        days_html = [
+            '<div class="days">',
+            '<p>Days Behind Italy</p>',
+            '<h1 style="color: ' + getDaysColor(country['days']) + '">' + country['days'] + '</h1>',
+            '</div>'
+        ].join('');
+    }
 
+    let dynamicClass = isFilter ? 'filter-el noselect' : 'summary-el noselect';
     let html = [
-        '<div class="summary-el noselect" data-id="' + data['id'] + '">',
+        '<div class="' + dynamicClass + '" data-id="' + data['id'] + '">',
         title_html,
         cases_html,
         days_html,
@@ -209,6 +250,23 @@ render.summaryRow = function (data, country) {
     ];
 
     return html.join('');
+};
+
+render.filters = function () {
+    let filter_elements_html = [];
+    dataCount.forEach(function (el) {
+        if (el.id !== 'italy' && dataset[el.id] && dataset[el.id].data) {
+            // Create body wrapper div
+            filter_elements_html.push(render.summaryRow(el, dataset[el.id], true));
+        }
+    });
+    return [
+        '<div class="filter-header">',
+        '<p>Select countries to display</p>',
+        '</div>',
+        filter_elements_html.join(''),
+        '<div class="filter-submit"><p id="filter-submit-button">Apply</p></div>'
+    ].join('');
 };
 
 function getDaysColor(days) {
@@ -235,4 +293,24 @@ function getIncreasePercentageColor(p) {
         color = 'rgba(20, 199, 88, 0.4)';
     }
     return color;
+}
+
+function abbreviateNumber(value) {
+    let newValue = value;
+    if (value >= 1000) {
+        let suffixes = ["", " K", " M", " B", " T"];
+        let suffixNum = Math.floor(("" + value).length / 3);
+        if (suffixNum > 2) suffixNum = 2;
+        let shortValue = '';
+        for (let precision = 4; precision >= 1; precision--) {
+            shortValue = parseFloat((suffixNum !== 0 ? (value / Math.pow(1000, suffixNum)) : value).toPrecision(precision));
+            let dotLessShortValue = (shortValue + '').replace(/[^a-zA-Z 0-9]+/g, '');
+            if (dotLessShortValue.length <= 4) {
+                break;
+            }
+        }
+        if (shortValue % 1 !== 0) shortValue = shortValue['toFixed'](2);
+        newValue = shortValue + suffixes[suffixNum];
+    }
+    return newValue;
 }

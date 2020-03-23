@@ -4,14 +4,24 @@ let dataCount = [];
 let dataCountryCache = {};
 
 // const displayList = ['united_kingdom'];
-const displayList = [];
+let displayList = [];
 const ignoreList = ['china', 'korea_south', 'cruise_ship'];
+
 const minTotal = 100;
-let startingCount = 3000;
+let startingCount = 4000;
+let startingWeighted = 20;
 let expand = false;
+let weighted = false;
 
 (function init() {
     $(document).ready(function () {
+        // Fetch display params
+        displayList = [];
+        let displayParams = urlParams.get('display');
+        if (displayParams) {
+            displayParams = decodeURIComponent(displayParams);
+            displayList = displayParams.split(',');
+        }
         initControls();
         initTwitter();
         getData();
@@ -20,12 +30,32 @@ let expand = false;
 
 function initControls() {
 
-    // Set initial starting range from url param
-    const urlStarting = urlParams.get('starting') ? parseInt(urlParams.get('starting')) : 0;
-    if (urlStarting && urlStarting >= minTotal && urlStarting <= 10000) startingCount = urlStarting;
-
     // Expand
     if (urlParams.get('expand') && urlParams.get('expand') === '1') expand = true;
+
+    // Weighted
+    if (urlParams.get('weighted') && urlParams.get('weighted') === '1') weighted = true;
+
+    // Set defaults
+    startingCount = weighted ? startingWeighted : 4000;
+
+    // Set initial starting range from url param
+    const urlStarting = urlParams.get('starting') ? parseInt(urlParams.get('starting')) : 0;
+    if (urlStarting) {
+        // Use url params
+        if (weighted) {
+            if (urlStarting >= 1 && urlStarting <= 500) {
+                startingCount = urlStarting;
+            } else {
+                // Out of range
+                startingCount = startingWeighted;
+            }
+        } else {
+            if (urlStarting >= minTotal && urlStarting <= 10000) {
+                startingCount = urlStarting;
+            }
+        }
+    }
 
     // Bind event handlers
     $('#starting-range').mousemove(function () {
@@ -36,7 +66,7 @@ function initControls() {
             urlGenerator('starting', startingCount);
             initProcessData();
         }, 500);
-    }).val(startingCount);
+    });
 
     $('#expand').on('change', function () {
         expand = $(this).is(":checked");
@@ -44,16 +74,119 @@ function initControls() {
         initProcessData();
     });
 
+    $('#weighted').on('change', function () {
+        weighted = $(this).is(":checked");
+        startingCount = weighted ? startingWeighted : 4000;
+        setWeighedSliders();
+        $('#starting-range-label').text(startingCount);
+        $('#starting-range').val(startingCount);
+        urlGenerator('weighted', weighted ? '1' : '0');
+        initProcessData();
+    });
+
     // Set initial values
+    initFilters();
+    setWeighedSliders();
     setSliders();
+    setToggle();
+}
+
+function initFilters() {
+    const filterButtonEl = $('#filter-btn');
+    let filter_html = '';
+    if (displayList.length > 0) {
+        const src = 'img/misc/filter-clear.svg';
+        filter_html = '<p>Clear Filter</p><img src="' + src + '" alt="Clear Filter Icon">';
+    } else {
+        const src = 'img/misc/filter.svg';
+        filter_html = '<p>Filter</p><img src="' + src + '" alt="Filter Icon">';
+    }
+    filterButtonEl.html(filter_html);
+    const filterEl = $('#filter');
+    const filterBgEl = $('#filter-bg');
+    filterEl.attr('data-show', '0');
+    filterEl.hide();
+    filterBgEl.hide();
+    filterButtonEl.on('click', function () {
+        toggleFilters();
+    });
+    filterBgEl.on('click', function () {
+        toggleFilters();
+    });
+}
+
+function toggleFilters() {
+    const filterEl = $('#filter');
+    const filterBgEl = $('#filter-bg');
+
+    if (displayList.length > 0) {
+        // Clear filters
+        urlGenerator('display', '');
+        location.reload();
+    } else {
+        if (filterEl.attr('data-show') === '0') {
+            filterEl.attr('data-show', '1');
+            filterEl.show();
+            filterBgEl.show();
+            filterEl.html(render.filters());
+            // Attach event handlers
+            $('.filter-el').on('click', function () {
+                const selectedEl = $(this);
+                if (selectedEl.hasClass('selected')) {
+                    selectedEl.removeClass('selected');
+                } else {
+                    selectedEl.addClass('selected');
+                }
+            });
+            $('#filter-submit-button').on('click', function () {
+                let selected = [];
+                $('.filter-el.selected').each(function () {
+                    selected.push($(this).attr('data-id'));
+                });
+                if (selected.length > 0) {
+                    urlGenerator('display', selected.join(','));
+                    setTimeout(function () {
+                        location.reload()
+                    }, 100);
+                }
+                toggleFilters();
+            });
+        } else {
+            filterEl.attr('data-show', '0');
+            filterEl.hide();
+            filterBgEl.hide();
+        }
+    }
+}
+
+function setWeighedSliders() {
+    const titleEl = $('#starting-range-title');
+    const inputEl = $('#starting-range');
+    if (weighted) {
+        titleEl.text('Starting Italy Case Number / 1M');
+        inputEl.attr('min', '1');
+        inputEl.attr('max', '50');
+        inputEl.attr('step', '1');
+    } else {
+        titleEl.text('Starting Italy Case Number');
+        inputEl.attr('min', '100');
+        inputEl.attr('max', '10000');
+        inputEl.attr('step', '100');
+    }
+    inputEl.val(startingCount);
 }
 
 function setSliders() {
     // Starting
     $('#starting-range-label').text(startingCount);
+}
 
+function setToggle() {
     // Expand
     $('#expand').prop('checked', expand);
+
+    // Weighted
+    $('#weighted').prop('checked', weighted);
 }
 
 function urlGenerator(field, value) {
@@ -111,11 +244,23 @@ function processData(cb) {
                 let latest = 0;
                 if (obj[prop] && obj[prop].length > 0) {
                     dataCountryCache[id] = {};
+                    dataFixture.population[id].millions = Number(dataFixture.population[id].full / 1000000);
                     for (let i = 0; i < obj[prop].length; i++) {
-                        if (obj[prop][i]['confirmed'] >= startingCount) {
-                            arr.push(obj[prop][i]);
-                            if (i === obj[prop].length - 1) {
-                                latest = obj[prop][i]['confirmed'];
+                        if (weighted) {
+                            // Calculate weighted
+                            obj[prop][i]['weighted'] = Number((obj[prop][i]['confirmed'] / dataFixture.population[id].millions).toFixed(2));
+                            if (obj[prop][i]['weighted'] >= startingCount) {
+                                arr.push(obj[prop][i]);
+                                if (i === obj[prop].length - 1) {
+                                    latest = obj[prop][i]['confirmed'];
+                                }
+                            }
+                        } else {
+                            if (obj[prop][i]['confirmed'] >= startingCount) {
+                                arr.push(obj[prop][i]);
+                                if (i === obj[prop].length - 1) {
+                                    latest = obj[prop][i]['confirmed'];
+                                }
                             }
                         }
                         // Add to country cache
@@ -126,22 +271,34 @@ function processData(cb) {
                     if (displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') {
                         // Skip this
                     } else if (ignoreList.indexOf(id) === -1) {
+                        // Calculate weighted
+                        let weightedLatest;
+                        if (weighted) weightedLatest = Number((latest / dataFixture.population[id].millions).toFixed(2));
                         processed[id] = {
                             name: prop,
                             data: arr,
                             count: arr.length,
-                            latest: latest
+                            latest: latest,
+                            population: dataFixture.population[id].full,
+                            id: id,
+                            millions: dataFixture.population[id].millions,
+                            weighted: weightedLatest
                         };
                         dataCount.push({
                             id: id,
-                            latest: latest
+                            latest: latest,
+                            weighted: weightedLatest
                         });
                     }
                 }
             }
         }
     }
-    dataCount.sort((a, b) => (a.latest < b.latest) ? 1 : -1);
+    if (weighted) {
+        dataCount.sort((a, b) => (a.weighted < b.weighted) ? 1 : -1);
+    } else {
+        dataCount.sort((a, b) => (a.latest < b.latest) ? 1 : -1);
+    }
 
     // -------------------------------------------------
     // ------------ Shift To Match Italy ---------------
@@ -154,13 +311,14 @@ function processData(cb) {
             if (country['name'] !== 'Italy') {
                 let countryData = country['data'];
                 // Get max for country
-                const countryMax = country['latest'];
+                const countryMax = weighted ? country['weighted'] : country['latest'];
+                const targetProp = weighted ? 'weighted' : 'confirmed';
                 // Find index of lowest delta
                 delta = {};
                 let value;
                 for (let i = 0; i < italyData.length; i++) {
                     // Record lowest delta
-                    value = Math.abs(italyData[i]['confirmed'] - countryMax);
+                    value = Math.abs(italyData[i][targetProp] - countryMax);
                     if (typeof delta.value === "undefined" || delta.value > value) {
                         delta.value = value;
                         delta.idx = i;
@@ -177,7 +335,7 @@ function processData(cb) {
                     const earliestDate = countryData[0]['date'];
                     while (countryData.length !== (delta.idx + 1)) {
                         daysBehind++;
-                        let d = new Date(earliestDate);
+                        let d = generateNewDate(earliestDate);
                         d.setDate(d.getDate() - daysBehind);
                         // Get formatted date
                         const formattedDate = moment(d).format('YYYY-M-D');
@@ -186,7 +344,8 @@ function processData(cb) {
                             date: d,
                             confirmed: countryDataRaw['confirmed'] || '-',
                             deaths: countryDataRaw['deaths'] || '-',
-                            recovered: countryDataRaw['recovered'] || '-'
+                            recovered: countryDataRaw['recovered'] || '-',
+                            weighted: Number((countryDataRaw['confirmed'] / dataFixture.population[country['id']].millions).toFixed(2)) || '-'
                         });
                     }
                     country['data'] = countryData;
@@ -198,7 +357,7 @@ function processData(cb) {
                 let daysForward = 0;
                 const latestDate = countryData[countryData.length - 1]['date'];
                 while (countryData.length !== italyData.length + 1) {
-                    let d = new Date(latestDate);
+                    let d = generateNewDate(latestDate);
                     d.setDate(d.getDate() + daysForward + 1);
                     countryData.push({
                         date: d,
@@ -222,7 +381,8 @@ function processData(cb) {
     });
 
     // Add end buffer date to Italy
-    let lastItalyDate = new Date(processed['italy']['data'][processed['italy']['data'].length - 1]['date']);
+    let lastItalyDate = generateNewDate(processed['italy']['data'][processed['italy']['data'].length - 1]['date']);
+
     lastItalyDate.setDate(lastItalyDate.getDate() + 1);
     processed['italy']['data'].push({
         date: lastItalyDate,
@@ -239,20 +399,19 @@ function processData(cb) {
             let country = processed[prop];
             let data = {};
             let dataPrev = {};
-            const max = country['latest'];
+            const targetProp = weighted ? 'weighted' : 'confirmed';
+            const max = weighted ? country['weighted'] : country['latest'];
             for (let i = 0; i < country['data'].length; i++) {
                 data = country['data'][i];
-
                 // Calculate daily percentage increase
                 dataPrev = country['data'][i - 1];
-                if (data && dataPrev && typeof data['confirmed'] === "number" && typeof dataPrev['confirmed'] === "number") {
+                if (data && dataPrev && typeof data[targetProp] === "number" && typeof dataPrev[targetProp] === "number") {
                     // Calculate percentage increase from previous day
-                    country['data'][i]['increase_p'] = Math.round(((data['confirmed'] - dataPrev['confirmed']) / data['confirmed']) * 100);
+                    country['data'][i]['increase_p'] = Math.round(((data[targetProp] - dataPrev[targetProp]) / data[targetProp]) * 100);
                 }
-
                 // Calculate percentage of total
-                if (data && typeof data['confirmed'] === "number") {
-                    country['data'][i]['total_p'] = (100 - (((max - data['confirmed']) / max) * 100)).toFixed(2);
+                if (data && typeof data[targetProp] === "number") {
+                    country['data'][i]['total_p'] = (100 - (((max - data[targetProp]) / max) * 100)).toFixed(2);
                 }
             }
         }
@@ -312,7 +471,7 @@ function renderSummary() {
         if (el.id !== 'italy' && dataset[el.id] && dataset[el.id].data) {
             // Create body wrapper div
             html_arr.push([
-                render.summaryRow(el, dataset[el.id])
+                render.summaryRow(el, dataset[el.id], false)
             ].join(''));
         }
     });
@@ -328,6 +487,15 @@ function renderSummary() {
             }, 1000);
         }
     });
+}
+
+function generateNewDate(dateStr) {
+    let date = new Date(dateStr);
+    if (Number.isNaN(date.getMonth())) {
+        let arr = dateStr.split(/[- :]/);
+        date = new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4], arr[5]);
+    }
+    return date;
 }
 
 

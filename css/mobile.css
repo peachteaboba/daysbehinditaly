@@ -3,4 +3,9 @@
         /*outline: 5px solid red;*/
         /*margin-top: 100px;*/
     }
+
+    #filter {
+        width: 90%;
+        left: 5%;
+    }
 }

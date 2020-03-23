@@ -34,6 +34,7 @@
     <!-- JS -->
     <script type="text/javascript" src="js/packages/jquery.min.js"></script>
     <script type="text/javascript" src="js/packages/moment.min.js"></script>
+    <script type="text/javascript" src="./js/data.js"></script>
     <script type="text/javascript" src="./js/render.js"></script>
     <script type="text/javascript" src="./js/index.js"></script>
 
@@ -55,9 +56,9 @@
                 CSSE</a></p>
         </div>
         <div class="slide-container">
-            <label for="starting-range">Starting Italy Case Number</label>
+            <label for="starting-range" id="starting-range-title">Starting Italy Case Number</label>
             <div id="amount_slider"></div>
-            <input type="range" min="100" max="10000" value="3000" class="slider" id="starting-range" name="starting" step="100">
+            <input type="range" min="100" max="10000" value="4000" class="slider" id="starting-range" name="starting" step="100">
             <p id="starting-range-label">-</p>
         </div>
         <div class="toggle-wrapper">
@@ -67,12 +68,28 @@
                 <span class="toggle-slider"></span>
             </label>
         </div>
+        <div class="toggle-wrapper">
+            <p>Population Weighted</p>
+            <label class="toggle">
+                <input type="checkbox" id="weighted"/>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div id="filter-btn">
+            <p>Filter</p>
+            <img src="./img/misc/filter.svg" alt="Filter Icon">
+        </div>
         <div id="summary-wrapper"></div>
     </div>
     <!---------------->
     <!-- BODY PANEL -->
     <!---------------->
     <div id="body"></div>
+    <!------------------>
+    <!-- FILTER PANEL -->
+    <!------------------>
+    <div id="filter-bg"></div>
+    <div id="filter"></div>
     <!----------------->
     <!-- RIGHT PANEL -->
     <!----------------->
@@ -88,13 +105,16 @@
                 <p>Created by <a href="https://twitter.com/ndyf" target="_blank">Andy Feng</a><br>Made with ♥ in Los
                     Angeles, CA</p>
                 <p>⬩</p>
-                <p>Powered by data from <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">Johns
-                    Hopkins CSSE</a></p>
+                <p>Powered by data published by <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">Johns
+                    Hopkins University, CSSE</a></p>
                 <p>⬩</p>
-                <p>API endpoint by <a href="https://github.com/pomber/covid19"
+                <p>Using API endpoint by <a href="https://github.com/pomber/covid19"
                                       target="_blank">github.com/pomber/covid19</a></p>
                 <p>⬩</p>
-                <p>Inspired by the following tweets:</p>
+                <p>Population data via <a href="https://www.worldometers.info/population/"
+                                      target="_blank">Worldometer</a></p>
+                <p>⬩</p>
+                <p>Inspired by the following posts:</p>
             </div>
         </div>
         <div id="tweet-embeds">
