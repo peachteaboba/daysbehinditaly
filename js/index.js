@@ -5,7 +5,7 @@ let dataCountryCache = {};
 
 // const displayList = ['united_kingdom'];
 let displayList = [];
-const ignoreList = ['china', 'korea_south', 'cruise_ship'];
+const ignoreList = ['china', 'korea_south', 'cruise_ship', 'dominica'];
 
 const minTotal = 100;
 let startingCount = 4000;
@@ -236,7 +236,7 @@ function processData(cb) {
     for (let prop in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, prop)) {
             const id = prop.replace(/\s+/g, '_').toLowerCase().replace(/[^\w\s]/gi, '');
-            if (displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') {
+            if ((displayList.length > 0 && displayList.indexOf(id) === -1 && id !== 'italy') || !dataFixture.population[id]) {
                 // Skip this country
             } else {
                 // Add to list
