@@ -423,6 +423,12 @@ function processData(cb) {
 }
 
 function renderList() {
+
+    setTimeout(function () {
+        $('#body .loading-wrapper').html('');
+        $('#body-content-wrapper').removeClass('hide').addClass('show');
+    }, 500);
+
     const bodyEl = $('#body');
 
     let html_arr = [];
@@ -452,11 +458,7 @@ function renderList() {
         html_arr.join(''),
         '</div>'
     ].join(''));
-
-    setTimeout(function () {
-        $('#body .loading-wrapper').html('');
-        $('#body-content-wrapper').removeClass('hide').addClass('show');
-    }, 500);
+    
 }
 
 function renderSummary() {
