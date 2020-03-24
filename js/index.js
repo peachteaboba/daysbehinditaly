@@ -8,8 +8,9 @@ let displayList = [];
 const ignoreList = ['china', 'korea_south', 'cruise_ship', 'dominica'];
 
 const minTotal = 100;
-let startingCount = 4000;
+let startingCount = 5000;
 let startingWeighted = 20;
+let limitMax = 10;
 let expand = false;
 let weighted = false;
 
@@ -36,8 +37,11 @@ function initControls() {
     // Weighted
     if (urlParams.get('weighted') && urlParams.get('weighted') === '1') weighted = true;
 
+    // Limit
+    if (urlParams.get('limit')) limitMax = parseInt(urlParams.get('limit'));
+
     // Set defaults
-    startingCount = weighted ? startingWeighted : 4000;
+    startingCount = weighted ? startingWeighted : 5000;
 
     // Set initial starting range from url param
     const urlStarting = urlParams.get('starting') ? parseInt(urlParams.get('starting')) : 0;
@@ -299,6 +303,7 @@ function processData(cb) {
     } else {
         dataCount.sort((a, b) => (a.latest < b.latest) ? 1 : -1);
     }
+    dataCount = dataCount.slice(0, limitMax + 1);
 
     // -------------------------------------------------
     // ------------ Shift To Match Italy ---------------
