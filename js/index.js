@@ -458,7 +458,7 @@ function renderList() {
         html_arr.join(''),
         '</div>'
     ].join(''));
-    
+
 }
 
 function renderSummary() {

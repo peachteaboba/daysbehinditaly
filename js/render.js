@@ -185,7 +185,8 @@ render.countryColumn = function (data, idx, id) {
     // Calculate how many times italy
     let multiples_html = '<span> - </span>';
     const italyPop = dataFixture.population['italy'];
-    const numMultiples = (data.population / italyPop).toFixed(2);
+    const numMultiples = (data.population / italyPop.full).toFixed(2);
+    
     if (data['name'] !== 'Italy') {
         multiples_html = numMultiples + '<span> times Italy</span>';
     }
