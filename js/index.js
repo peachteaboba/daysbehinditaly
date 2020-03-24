@@ -10,7 +10,7 @@ const ignoreList = ['china', 'korea_south', 'cruise_ship', 'dominica'];
 const minTotal = 100;
 let startingCount = 5000;
 let startingWeighted = 20;
-let limitMax = 10;
+let limitMax = 15;
 let expand = false;
 let weighted = false;
 
@@ -38,6 +38,7 @@ function initControls() {
     if (urlParams.get('weighted') && urlParams.get('weighted') === '1') weighted = true;
 
     // Limit
+    if (weighted) limitMax = 30;
     if (urlParams.get('limit')) limitMax = parseInt(urlParams.get('limit'));
 
     // Set defaults
