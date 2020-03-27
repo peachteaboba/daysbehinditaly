@@ -1,13 +1,21 @@
 const urlParams = new URLSearchParams(window.location.search);
 let render = {};
 
-render.dayColumn = function (count) {
+render.dayColumn = function (country) {
     let html = [
         '<div class="day-title">Day</div>'
     ];
-    for (let i = 1; i <= count + 1; i++) {
+    for (let i = 0; i < country.data.length; i++) {
+        // ---------------------------------
+        // Set dynamic classes based on date
+        // ---------------------------------
+        let date = generateNewDate(country.data[i]['date']);
+        const moment_date = moment(date);
+        date = moment(date).format('ddd, MMM DD');
+        let isSameDay = moment_date.isSame(moment(), 'day');
         const dynamicClass = i % 2 !== 0 ? 'even' : '';
-        html.push('<div class="' + dynamicClass + '"> ' + (i === count + 1 ? 'Today' : i) + ' </div>');
+        html.push('<div class="' + dynamicClass + '"> ' + (isSameDay ? 'Today' : i + 1) + ' </div>');
+        if (isSameDay) break;
     }
     return html.join('');
 };
@@ -30,7 +38,11 @@ render.countryColumn = function (data, idx, id) {
         const moment_date = moment(date);
         date = moment(date).format('ddd, MMM DD');
         let isSameDayClass = '';
-        if (moment_date.isSame(moment(), 'day')) isSameDayClass = ' today';
+        let isSameDay = false;
+        if (moment_date.isSame(moment(), 'day')) {
+            isSameDayClass = ' today';
+            isSameDay = true;
+        }
         const dynamicClass = i % 2 === 0 ? 'date even' + isSameDayClass : 'date' + isSameDayClass;
         date_html.push('<div class="' + dynamicClass + '"> ' + date);
 
@@ -38,13 +50,16 @@ render.countryColumn = function (data, idx, id) {
         // Add days forward if needed
         // --------------------------
         const days = data.data[i]['days'];
-        if (data['name'] !== 'Italy' && typeof days !== "undefined") {
-            if (days === 0) {
-                date_html.push('<div class="days-forward">Today</div>');
-            } else {
-                date_html.push('<div class="days-forward">+ ' + days + ' days</div>');
+        if (data['name'] !== 'Italy') {
+            if (typeof days !== "undefined" || isSameDay) {
+                if (isSameDayClass !== '') {
+                    date_html.push('<div class="days-forward">Today</div>');
+                } else {
+                    date_html.push('<div class="days-forward">+ ' + days + ' days</div>');
+                }
             }
         }
+
         date_html.push('</div>');
     }
     date_html.push('</div>');
@@ -186,7 +201,7 @@ render.countryColumn = function (data, idx, id) {
     let multiples_html = '<span> - </span>';
     const italyPop = dataFixture.population['italy'];
     const numMultiples = (data.population / italyPop.full).toFixed(2);
-    
+
     if (data['name'] !== 'Italy') {
         multiples_html = numMultiples + '<span> times Italy</span>';
     }

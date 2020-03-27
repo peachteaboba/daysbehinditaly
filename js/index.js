@@ -5,10 +5,11 @@ let dataCountryCache = {};
 
 // const displayList = ['united_kingdom'];
 let displayList = [];
-const ignoreList = ['china', 'korea_south', 'cruise_ship', 'dominica'];
+const ignoreList = ['china', 'cruise_ship'];
 
 const minTotal = 100;
-let startingCount = 5000;
+const maxTotal = 30000;
+let startingCount = 6000;
 let startingWeighted = 20;
 let limitMax = 15;
 let expand = false;
@@ -42,7 +43,7 @@ function initControls() {
     if (urlParams.get('limit')) limitMax = parseInt(urlParams.get('limit'));
 
     // Set defaults
-    startingCount = weighted ? startingWeighted : 5000;
+    startingCount = weighted ? startingWeighted : 6000;
 
     // Set initial starting range from url param
     const urlStarting = urlParams.get('starting') ? parseInt(urlParams.get('starting')) : 0;
@@ -56,7 +57,7 @@ function initControls() {
                 startingCount = startingWeighted;
             }
         } else {
-            if (urlStarting >= minTotal && urlStarting <= 10000) {
+            if (urlStarting >= minTotal && urlStarting <= maxTotal) {
                 startingCount = urlStarting;
             }
         }
@@ -175,7 +176,7 @@ function setWeighedSliders() {
     } else {
         titleEl.text('Starting Italy Case Number');
         inputEl.attr('min', '100');
-        inputEl.attr('max', '10000');
+        inputEl.attr('max', maxTotal);
         inputEl.attr('step', '100');
     }
     inputEl.val(startingCount);
@@ -360,9 +361,9 @@ function processData(cb) {
                 // ------------ Populate Remaining Days ---------------
                 // ----------------------------------------------------
                 countryData = country['data'];
-                let daysForward = 0;
+                let daysForward = 1;
                 const latestDate = countryData[countryData.length - 1]['date'];
-                while (countryData.length !== italyData.length + 1) {
+                while (countryData.length !== italyData.length) {
                     let d = generateNewDate(latestDate);
                     d.setDate(d.getDate() + daysForward + 1);
                     countryData.push({
@@ -387,15 +388,14 @@ function processData(cb) {
     });
 
     // Add end buffer date to Italy
-    let lastItalyDate = generateNewDate(processed['italy']['data'][processed['italy']['data'].length - 1]['date']);
-
-    lastItalyDate.setDate(lastItalyDate.getDate() + 1);
-    processed['italy']['data'].push({
-        date: lastItalyDate,
-        confirmed: '-',
-        deaths: '-',
-        recovered: '-'
-    });
+    // let lastItalyDate = generateNewDate(processed['italy']['data'][processed['italy']['data'].length - 1]['date']);
+    // lastItalyDate.setDate(lastItalyDate.getDate() + 1);
+    // processed['italy']['data'].push({
+    //     date: lastItalyDate,
+    //     confirmed: '-',
+    //     deaths: '-',
+    //     recovered: '-'
+    // });
 
     // -------------------------------------------------
     // ------------ Calculate Percentages --------------
@@ -445,7 +445,7 @@ function renderList() {
                 '<div class="body-wrapper" data-id="' + el.id + '">',
                 // Render day element
                 '<div class="day-wrapper">',
-                render.dayColumn(dataset['italy'].count),
+                render.dayColumn(dataset['italy']),
                 '</div>',
                 // Render italy element
                 '<div class="italy-wrapper">',

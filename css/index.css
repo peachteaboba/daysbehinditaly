@@ -214,9 +214,14 @@ body {
     /*outline: 1px dotted red;*/
     background: rgba(255, 255, 255, 0.075);
     border-top-right-radius: 6px;
-    border-top-left-radius: 6px;
+    /*border-top-left-radius: 6px;*/
     padding-bottom: 4px;
     /*margin-bottom: 8px;*/
+}
+
+.italy-wrapper .country-title-text-wrapper {
+    border-top-right-radius: unset;
+    border-top-left-radius: 6px;
 }
 
 
@@ -301,8 +306,15 @@ body {
     background: white;
     /*border-top-right-radius: 6px;*/
     border-bottom-right-radius: 6px;
+    /*border-bottom-left-radius: 6px;*/
+}
+
+.italy-wrapper .country-body {
+    border-bottom-right-radius: 0;
     border-bottom-left-radius: 6px;
 }
+
+
 
 .country-date {
     display: inline-block;
